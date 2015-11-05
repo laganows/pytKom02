@@ -5,35 +5,35 @@ class Node(object):
         return self.printTree()
 
 
-class BinExpr(Node):
-
-    def __init__(self, op, left, right):
-        self.op = op
-        self.left = left
-        self.right = right
-
 class Program(Node):
 
     def __init__(self, blocks):
         self.blocks = blocks
 
 class Blocks(Node):
-
     def __init__(self, block, blocks):
-        self.block = block
-        self.blocks = blocks
+		self.blocks = []
+		if blocks:
+			self.blocks.extend(blocks.blocks)
+		if block:
+			self.blocks.append(block)
 
+class Block(Node):
+    pass
 
 class Init(Node):
 
-    def __init__(self, name, expression):
-        self.name = name
+    def __init__(self, id, expression):
+        self.id = id
         self.expression = expression
 
 class Declarations(Node):
     def __init__(self, declarations, declaration):
-        self.declarations = declarations
-        self.declaration = declaration
+        self.declarations = []
+        if declarations:
+            self.declarations.extend(declarations.declarations)
+        if declaration:
+            self.declarations.append(declaration)
 
 class Declaration(Node):
     def __init__(self, type, inits, error):
@@ -63,8 +63,8 @@ class Condition(Node):
     pass
 
 
-class Expression(Condition):
-    pass
+
+
 
 class Instruction(Node):
     pass
@@ -99,6 +99,12 @@ class Else(Node):
     def __init__(self, statement):
         self.statement = statement
 
+class While(Instruction):
+    def __init__(self, cond, statement, error):
+        self.cond = cond
+        self.statement = statement
+        self.error = error
+
 class RepeatUntil(Instruction):
     def __init__(self, statement, cond):
         self.cond = cond
@@ -116,15 +122,8 @@ class Break(Instruction):
     pass
 
 class Compound(Instruction):
-    def __init__(self, declarations, instructions):
-        self.declarations = declarations
-        self.instructions = instructions
-
-
-class Condition(Node):
-    pass
-
-
+    def __init__(self, blocks):
+        self.blocks = blocks
 
 
 class Expression(Condition):
@@ -165,8 +164,8 @@ class ExpressionList(Node):
         if expression:
             self.expressions.append(expression)
 
-class Const(Node):
-    pass
+# class Const(Node):
+#     pass
 
 class FunctionDefinitions(Node):
     def __init__(self, fundef, fundefs):

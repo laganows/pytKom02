@@ -9,6 +9,7 @@ class Cparser(object):
     def __init__(self):
         self.scanner = Scanner()
         self.scanner.build()
+        self.no_error = True
 
     tokens = Scanner.tokens
 
@@ -30,6 +31,7 @@ class Cparser(object):
 
 
     def p_error(self, p):
+        self.no_error = False
         if p:
             print("Syntax error at line {0}, column {1}: LexToken({2}, '{3}')".format(p.lineno, self.scanner.find_tok_column(p), p.type, p.value))
         else:
@@ -41,9 +43,9 @@ class Cparser(object):
         """program : blocks"""
         p[0] = AST.Program(p[1])
         p[0].line = self.scanner.lexer.lineno
-        # if self.no_error:
-        #     # p[0].print_tree(0)
-        #     pass
+        if self.no_error:
+            # p[0].print_tree(0)
+            pass
 
     def p_blocks(self, p):
         """blocks : blocks block
@@ -56,9 +58,9 @@ class Cparser(object):
 
     def p_block(self, p):
         """block : fundef
-                 | instructions
+                 | instruction
                  | declaration """
-        p[0] = p[1]   #instruction -> instructionS
+        p[0] = p[1]   #instruction -> instruction
         p[0].line = self.scanner.lexer.lineno
 
 
@@ -79,6 +81,7 @@ class Cparser(object):
             p[0] = AST.Declaration(p[1],p[2],None)
         else:
             p[0] = AST.Declaration(None, None, p[1])
+        p[0].line = self.scanner.lexer.lineno
 
     def p_inits(self, p):
         """inits : inits ',' init
@@ -87,10 +90,12 @@ class Cparser(object):
             p[0] = AST.Inits(p[1], p[3])
         else:
             p[0] = AST.Inits(None, p[1])
+        p[0].line = self.scanner.lexer.lineno
 
     def p_init(self, p):
         """init : ID '=' expression """
         p[0] = AST.Init(p[1], p[3])
+        p[0].line = self.scanner.lexer.lineno
 
 
     # def p_instructions_opt(self, p):
@@ -106,6 +111,7 @@ class Cparser(object):
             p[0] = AST.Instructions(p[1], p[2])
         else:
             p[0] = AST.Instructions(None, p[1])
+        p[0].line = self.scanner.lexer.lineno
 
 
     def p_instruction(self, p):
@@ -121,6 +127,7 @@ class Cparser(object):
                        | compound_instr
                        | expression ';' """
         p[0] = p[1]
+        p[0].line = self.scanner.lexer.lineno
 
 
     def p_print_instr(self, p):
@@ -131,15 +138,18 @@ class Cparser(object):
             p[0] = AST.Print(p[2], None)
         else:
             p[0] = AST.Print(None, p[2])
+        p[0].line = self.scanner.lexer.lineno
 
 
     def p_labeled_instr(self, p):
         """labeled_instr : ID ':' instruction """
         p[0] = AST.Labeled(p[1], p[3])
+        p[0].line = self.scanner.lexer.lineno
 
     def p_assignment(self, p):
         """assignment : ID '=' expression ';' """
         p[0] = AST.Assignment(p[1], p[3])
+        p[0].line = self.scanner.lexer.lineno
 
     def p_choice_instr(self, p):
         """choice_instr : IF '(' condition ')' instruction  %prec IFX
@@ -168,6 +178,7 @@ class Cparser(object):
                 if_node = AST.If(None, p[5], p[3])
                 if_node.line = self.scanner.lexer.lineno
                 p[0] = AST.Choice(if_node, None)
+        p[0].line = self.scanner.lexer.lineno
 
     def p_while_instr(self, p):
         """while_instr : WHILE '(' condition ')' instruction
@@ -176,6 +187,7 @@ class Cparser(object):
             p[0] = AST.While(p[3], p[5], None)
         else:
             p[0] = AST.While(None, p[5], p[3])
+        p[0].line = self.scanner.lexer.lineno
 
     def p_repeat_instr(self, p):
         """repeat_instr : REPEAT instructions UNTIL condition ';' """
@@ -200,7 +212,7 @@ class Cparser(object):
 
 
     def p_compound_instr(self, p):
-        """compound_instr : '{' declarations instructions_opt '}' """
+        """compound_instr : '{' blocks '}' """
         p[0] = AST.Compound(p[2])
         p[0].line = self.scanner.lexer.lineno
 
