@@ -1,10 +1,7 @@
 from scanner import Scanner
 import AST
 
-
-
 class Cparser(object):
-
 
     def __init__(self):
         self.scanner = Scanner()
@@ -12,7 +9,6 @@ class Cparser(object):
         self.no_error = True
 
     tokens = Scanner.tokens
-
 
     precedence = (
        ("nonassoc", 'IFX'),   #najnizsze priorytety
@@ -29,7 +25,6 @@ class Cparser(object):
        ("left", '*', '/', '%'),
     )
 
-
     def p_error(self, p):
         self.no_error = False
         if p:
@@ -37,42 +32,29 @@ class Cparser(object):
         else:
             print("Unexpected end of input")
 
-
-    ##############
     def p_program(self, p):
-        """program : blocks"""
+        """program : parts"""
         p[0] = AST.Program(p[1])
         p[0].line = self.scanner.lexer.lineno
         if self.no_error:
             # p[0].print_tree(0)
             pass
 
-    def p_blocks(self, p):
-        """blocks : blocks block
-                  | block """
+    def p_parts(self, p):
+        """parts : parts part
+                  | part """
         if len(p) > 2:
-            p[0] = AST.Blocks(p[2], p[1])
+            p[0] = AST.Parts(p[2], p[1])
         else:
-            p[0] = AST.Blocks(p[1], None)
+            p[0] = AST.Parts(p[1], None)
         p[0].line = self.scanner.lexer.lineno
 
-    def p_block(self, p):
-        """block : fundef
+    def p_part(self, p):
+        """part : fundef
                  | instruction
                  | declaration """
         p[0] = p[1]   #instruction -> instruction
         p[0].line = self.scanner.lexer.lineno
-
-
-
-
-    # def p_declarations(self, p):
-    #     """declarations : declarations declaration
-    #                     | """
-    #     if len(p)>1:
-    #         p[0] = AST.Declarations(p[1],p[2])
-    #     else:
-    #         p[0] = AST.Declarations(None, None) #bo dopuszczamy produkcje pusta
 
     def p_declaration(self, p):
         """declaration : TYPE inits ';' 
@@ -96,12 +78,6 @@ class Cparser(object):
         """init : ID '=' expression """
         p[0] = AST.Init(p[1], p[3])
         p[0].line = self.scanner.lexer.lineno
-
-
-    # def p_instructions_opt(self, p):
-    #     """instructions_opt : instructions
-    #                         | """
-
 
     def p_instructions(self, p):
         """instructions : instructions instruction
@@ -212,7 +188,7 @@ class Cparser(object):
 
 
     def p_compound_instr(self, p):
-        """compound_instr : '{' blocks '}' """
+        """compound_instr : '{' parts '}' """
         p[0] = AST.Compound(p[2])
         p[0].line = self.scanner.lexer.lineno
 
@@ -290,20 +266,6 @@ class Cparser(object):
         else:
             p[0] = AST.ExpressionList(None, p[1])
         p[0].line = self.scanner.lexer.lineno
-
-    #def p_fundefs_opt(self, p):
-    #    """fundefs_opt : fundefs
-    #                   | """
-
-#    def p_fundefs(self, p):
-#        """fundefs : fundefs fundef
-#                   | fundef  """
-#        if len(p) > 2:
-#            p[0] = AST.FunctionDefinitions(p[2], p[1])
-#        else:
-#            p[0] = AST.FunctionDefinitions(p[1], None)
-#       p[0].line = self.scanner.lexer.lineno
-
 
     def p_fundef(self, p):
         """fundef : TYPE ID '(' args_list_or_empty ')' compound_instr """

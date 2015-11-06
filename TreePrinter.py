@@ -1,13 +1,11 @@
 import AST
 
-
 def add_to_class(cls):
     def decorator(func):
         setattr(cls, func.__name__, func)
         return func
 
     return decorator
-
 
 class TreePrinter:
     @classmethod
@@ -20,13 +18,12 @@ class TreePrinter:
 
     @add_to_class(AST.Program)
     def print_tree(self, indent):
-        self.blocks.print_tree(indent)
+        self.parts.print_tree(indent)
 		
-    @add_to_class(AST.Blocks)
+    @add_to_class(AST.Parts)
     def print_tree(self, indent):
-        for block in self.blocks:
-            block.print_tree(indent)
-
+        for part in self.parts:
+            part.print_tree(indent)
 
     @add_to_class(AST.Declarations)
     def print_tree(self, indent):
@@ -120,7 +117,7 @@ class TreePrinter:
 
     @add_to_class(AST.Compound)
     def print_tree(self, indent):
-        self.blocks.print_tree(indent)
+        self.parts.print_tree(indent)
 
     @add_to_class(AST.Const)
     def print_tree(self, indent):

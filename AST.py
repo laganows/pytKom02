@@ -7,18 +7,18 @@ class Node(object):
 
 class Program(Node):
 
-    def __init__(self, blocks):
-        self.blocks = blocks
+    def __init__(self, parts):
+        self.parts = parts
 
-class Blocks(Node):
-    def __init__(self, block, blocks):
-		self.blocks = []
-		if blocks:
-			self.blocks.extend(blocks.blocks)
-		if block:
-			self.blocks.append(block)
+class Parts(Node):
+    def __init__(self, part, parts):
+		self.parts = []
+		if parts:
+			self.parts.extend(parts.parts)
+		if part:
+			self.parts.append(part)
 
-class Block(Node):
+class Part(Node):
     pass
 
 class Init(Node):
@@ -122,8 +122,8 @@ class Break(Instruction):
     pass
 
 class Compound(Instruction):
-    def __init__(self, blocks):
-        self.blocks = blocks
+    def __init__(self, parts):
+        self.parts = parts
 
 
 class Expression(Condition):
